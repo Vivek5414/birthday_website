@@ -21630,51 +21630,123 @@ body,
 }
 
 .adventure-section .trail-signposts {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 24px 18px;
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: 148px;
+  gap: 18px 10px;
   margin-bottom: clamp(30px, 5vw, 58px);
 }
 
 .adventure-section .trail-signpost {
-  min-height: 148px;
+  position: relative;
+  z-index: 1;
+  display: grid;
+  min-width: 0;
+  min-height: 140px;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 64px auto;
   align-content: center;
+  justify-items: center;
   gap: 7px;
-  padding: 14px 10px 12px;
+  padding: 12px 8px;
   overflow: visible;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
+  border: 1px solid rgb(102 139 85 / 13%);
+  border-radius: 24px;
+  background: rgb(255 249 237 / 76%);
+  box-shadow: 0 6px 16px rgb(52 77 54 / 5%);
   color: var(--color-text);
   font-size: 13px;
   line-height: 1.35;
-  transition: color 180ms ease, transform 180ms ease;
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
 }
+
+.adventure-section .trail-signposts.is-visible .trail-signpost {
+  animation: railway-station-arrive 480ms both;
+}
+
+.adventure-section .trail-signposts.is-visible .trail-signpost:nth-of-type(2) { animation-delay: 40ms; }
+.adventure-section .trail-signposts.is-visible .trail-signpost:nth-of-type(3) { animation-delay: 80ms; }
+.adventure-section .trail-signposts.is-visible .trail-signpost:nth-of-type(4) { animation-delay: 120ms; }
+.adventure-section .trail-signposts.is-visible .trail-signpost:nth-of-type(5) { animation-delay: 160ms; }
+.adventure-section .trail-signposts.is-visible .trail-signpost:nth-of-type(6) { animation-delay: 200ms; }
+.adventure-section .trail-signposts.is-visible .trail-signpost:nth-of-type(7) { animation-delay: 240ms; }
+.adventure-section .trail-signposts.is-visible .trail-signpost:nth-of-type(8) { animation-delay: 280ms; }
+.adventure-section .trail-signposts.is-visible .trail-signpost:nth-of-type(9) { animation-delay: 320ms; }
+.adventure-section .trail-signposts.is-visible .trail-signpost:nth-of-type(10) { animation-delay: 360ms; }
 
 .adventure-section .trail-signpost::after {
-  z-index: 0;
-  top: 54px;
-  right: auto;
-  bottom: auto;
-  left: 50%;
-  width: calc(50% + 28px);
-  height: 0;
-  border-top: 2px dotted rgb(102 139 85 / 52%);
-  background: none;
-  content: "";
-  opacity: 0.8;
+  display: none;
 }
 
-.adventure-section .trail-signpost:nth-child(5n)::after {
+.adventure-section .railway-track {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.adventure-section .railway-track-tablet,
+.adventure-section .railway-track-desktop {
   display: none;
+}
+
+.adventure-section .railway-track-mobile {
+  display: block;
+}
+
+.adventure-section .railway-sleepers {
+  stroke: none;
+}
+
+.adventure-section .railway-rail {
+  fill: none;
+  stroke: #698866;
+  stroke-linecap: round;
+  stroke-width: 5;
+}
+
+.adventure-section .railway-train {
+  position: absolute;
+  z-index: 2;
+  display: block;
+  width: clamp(48px, 7vw, 64px);
+  height: auto;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  transition:
+    left 900ms cubic-bezier(0.2, 0.7, 0.25, 1),
+    top 900ms cubic-bezier(0.2, 0.7, 0.25, 1);
+}
+
+.adventure-section .railway-train svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 4px 3px rgb(52 77 54 / 20%));
+}
+
+.adventure-section .railway-wheel {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: railway-wheel-turn 1.2s linear infinite;
 }
 
 .adventure-section .trail-signpost:hover,
 .adventure-section .trail-signpost:focus-visible,
 .adventure-section .trail-signpost.is-active {
-  border: 0;
-  background: transparent;
-  box-shadow: none;
+  border-color: rgb(102 139 85 / 48%);
+  background: var(--color-ivory);
+  box-shadow: 0 10px 24px rgb(52 77 54 / 10%);
   color: var(--color-text);
   transform: translateY(-4px);
 }
@@ -21688,7 +21760,7 @@ body,
   position: absolute;
   z-index: 2;
   top: 7px;
-  left: calc(50% + 23px);
+  left: calc(50% + 10px);
   display: grid;
   width: 25px;
   height: 25px;
@@ -21706,9 +21778,13 @@ body,
 .adventure-section .trail-signpost-symbol {
   position: relative;
   z-index: 1;
-  width: 76px;
-  height: 76px;
+  display: grid;
+  width: 68px;
+  height: 68px;
+  flex: 0 0 auto;
+  place-items: center;
   border: 1px solid rgb(102 139 85 / 28%);
+  border-radius: 50%;
   background: var(--color-ivory);
   box-shadow: 0 8px 18px rgb(52 77 54 / 9%);
   transition:
@@ -21719,8 +21795,9 @@ body,
 }
 
 .adventure-section .trail-signpost-symbol .journey-companion {
-  width: 55px;
-  height: 55px;
+  width: 58%;
+  height: 58%;
+  overflow: visible;
   fill: var(--color-sage);
   stroke-width: 1.35;
 }
@@ -21748,8 +21825,8 @@ body,
 
 .adventure-section .trail-signpost-check {
   position: absolute;
-  right: -2px;
-  bottom: -3px;
+  right: 0;
+  bottom: 0;
   display: grid;
   width: 21px;
   height: 21px;
@@ -21763,8 +21840,13 @@ body,
 }
 
 .adventure-section .trail-signpost-label {
-  max-width: 154px;
-  min-height: 35px;
+  position: relative;
+  z-index: 1;
+  max-width: 18ch;
+  min-height: 0;
+  color: #354d39;
+  font-weight: 600;
+  overflow-wrap: anywhere;
   text-wrap: balance;
 }
 
@@ -21776,6 +21858,10 @@ body,
   background: var(--color-mint);
   box-shadow: 0 10px 22px rgb(52 77 54 / 15%);
   transform: scale(1.06);
+}
+
+.adventure-section .trail-signpost.is-visited .trail-signpost-symbol {
+  animation: railway-station-glow 2.8s ease-in-out infinite;
 }
 
 .adventure-section .trail-signpost.is-active .trail-signpost-number {
@@ -22089,21 +22175,7 @@ body,
   }
 }
 
-@media (max-width: 1024px) {
-  .adventure-section .trail-signposts {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 18px 14px;
-  }
-
-  .adventure-section .trail-signpost:not(:nth-child(3n)):not(:last-child)::after {
-    display: block;
-  }
-
-  .adventure-section .trail-signpost:nth-child(3n)::after,
-  .adventure-section .trail-signpost:last-child::after {
-    display: none;
-  }
-
+@media (min-width: 600px) and (max-width: 1023px) {
   .adventure-section .map-destination {
     min-width: 128px;
     min-height: 88px;
@@ -22111,46 +22183,6 @@ body,
 }
 
 @media (max-width: 680px) {
-  .adventure-section .trail-signposts {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px 10px;
-    padding-inline: 0;
-  }
-
-  .adventure-section .trail-signpost {
-    min-height: 132px;
-    padding-inline: 5px;
-    font-size: 12px;
-  }
-
-  .adventure-section .trail-signpost::after {
-    top: 49px;
-    width: calc(50% + 18px);
-  }
-
-  .adventure-section .trail-signpost:nth-child(2n + 1):not(:last-child)::after {
-    display: block;
-  }
-
-  .adventure-section .trail-signpost:nth-child(2n)::after,
-  .adventure-section .trail-signpost:last-child::after {
-    display: none;
-  }
-
-  .adventure-section .trail-signpost-symbol {
-    width: 68px;
-    height: 68px;
-  }
-
-  .adventure-section .trail-signpost-symbol .journey-companion {
-    width: 49px;
-    height: 49px;
-  }
-
-  .adventure-section .trail-signpost-number {
-    left: calc(50% + 20px);
-  }
-
   .adventure-section .safari-map {
     padding: 16px;
     border-radius: 22px 22px 38px 22px;
@@ -22228,6 +22260,189 @@ body,
 
   .adventure-section .safari-friend-buttons {
     justify-content: flex-start;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 1023px) {
+  .adventure-section .trail-signposts {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-rows: 148px;
+    gap: 20px 14px;
+  }
+
+  .adventure-section .trail-signpost:nth-of-type(1) { grid-column: 1; grid-row: 1; }
+  .adventure-section .trail-signpost:nth-of-type(2) { grid-column: 2; grid-row: 1; }
+  .adventure-section .trail-signpost:nth-of-type(3) { grid-column: 3; grid-row: 1; }
+  .adventure-section .trail-signpost:nth-of-type(4) { grid-column: 3; grid-row: 2; }
+  .adventure-section .trail-signpost:nth-of-type(5) { grid-column: 2; grid-row: 2; }
+  .adventure-section .trail-signpost:nth-of-type(6) { grid-column: 1; grid-row: 2; }
+  .adventure-section .trail-signpost:nth-of-type(7) { grid-column: 1; grid-row: 3; }
+  .adventure-section .trail-signpost:nth-of-type(8) { grid-column: 2; grid-row: 3; }
+  .adventure-section .trail-signpost:nth-of-type(9) { grid-column: 3; grid-row: 3; }
+  .adventure-section .trail-signpost:nth-of-type(10) { grid-column: 3; grid-row: 4; }
+
+  .adventure-section .railway-track-tablet {
+    display: block;
+  }
+
+  .adventure-section .railway-track-mobile,
+  .adventure-section .railway-track-desktop,
+  .adventure-section .railway-train-mobile,
+  .adventure-section .railway-train-desktop {
+    display: none;
+  }
+
+  .adventure-section .railway-train-tablet { display: block; }
+}
+
+@media (min-width: 1024px) {
+  .adventure-section .trail-signposts {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-auto-rows: 148px;
+    gap: 24px 18px;
+  }
+
+  .adventure-section .trail-signpost:nth-of-type(6) { grid-column: 5; grid-row: 2; }
+  .adventure-section .trail-signpost:nth-of-type(7) { grid-column: 4; grid-row: 2; }
+  .adventure-section .trail-signpost:nth-of-type(8) { grid-column: 3; grid-row: 2; }
+  .adventure-section .trail-signpost:nth-of-type(9) { grid-column: 2; grid-row: 2; }
+  .adventure-section .trail-signpost:nth-of-type(10) { grid-column: 1; grid-row: 2; }
+
+  .adventure-section .railway-track-desktop {
+    display: block;
+  }
+
+  .adventure-section .railway-track-mobile,
+  .adventure-section .railway-track-tablet,
+  .adventure-section .railway-train-mobile,
+  .adventure-section .railway-train-tablet {
+    display: none;
+  }
+
+  .adventure-section .railway-train-desktop { display: block; }
+}
+
+@media (max-width: 599px) {
+  .adventure-section .trail-signposts {
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: 148px;
+    gap: 16px;
+    padding-inline: 0;
+  }
+
+  .adventure-section .trail-signpost {
+    width: 43%;
+    min-height: 140px;
+    justify-self: start;
+    font-size: 12px;
+  }
+
+  .adventure-section .trail-signpost:nth-of-type(even) {
+    justify-self: end;
+  }
+
+  .adventure-section .trail-signpost::after {
+    position: absolute;
+    z-index: -1;
+    top: 46px;
+    right: auto;
+    left: 50%;
+    display: block;
+    width: calc(50% + clamp(14px, 4vw, 20px));
+    height: 2px;
+    border: 0;
+    background: linear-gradient(90deg, #698866, #b58a61);
+    content: "";
+    opacity: 0.72;
+  }
+
+  .adventure-section .trail-signpost:nth-of-type(even)::after {
+    right: 50%;
+    left: auto;
+    background: linear-gradient(90deg, #b58a61, #698866);
+  }
+
+  .adventure-section .railway-track-mobile {
+    display: block;
+  }
+
+  .adventure-section .railway-track-tablet,
+  .adventure-section .railway-track-desktop,
+  .adventure-section .railway-train-tablet,
+  .adventure-section .railway-train-desktop {
+    display: none;
+  }
+
+  .adventure-section .railway-train-mobile {
+    display: block;
+    width: 34px;
+  }
+
+  .adventure-section .trail-signpost-symbol {
+    width: 64px;
+    height: 64px;
+  }
+
+  .adventure-section .trail-signpost-number {
+    left: calc(50% + 8px);
+  }
+}
+
+@keyframes railway-wheel-turn {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes railway-station-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(9px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes railway-station-glow {
+  0%, 100% { box-shadow: 0 8px 18px rgb(52 77 54 / 9%); }
+  50% { box-shadow: 0 0 0 5px rgb(247 206 104 / 18%), 0 8px 20px rgb(52 77 54 / 12%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .adventure-section .trail-signpost,
+  .adventure-section .trail-signpost-symbol,
+  .adventure-section .railway-train,
+  .adventure-section .railway-wheel {
+    animation: none !important;
+    transition: none;
+  }
+}
+
+@media (max-width: 599px) {
+  .adventure-section .adventure-progress {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .adventure-section .adventure-progress-copy {
+    align-items: flex-start;
+  }
+
+  .adventure-section .adventure-progress-copy > span:last-child {
+    min-width: 0;
+  }
+
+  .adventure-section .adventure-progress-copy strong,
+  .adventure-section .adventure-progress-note {
+    overflow-wrap: anywhere;
+  }
+
+  .adventure-section .adventure-progress-track {
+    width: 100%;
+    min-width: 0;
   }
 }
 
@@ -22501,7 +22716,7 @@ body,
     grid-template-columns: repeat(6, minmax(0, 1fr));
     grid-template-rows: minmax(0, 1fr);
     gap: clamp(8px, 1.25vw, 18px);
-    height: clamp(640px, 45vw, 740px);
+    height: auto;
     min-height: 0;
   }
 
@@ -22537,9 +22752,6 @@ body,
   }
 
   .page-shell .story-section .story-milestone > .milestone-copy {
-    position: absolute;
-    right: 0;
-    left: 0;
     display: flex;
     min-width: 0;
     height: auto;
@@ -22548,18 +22760,6 @@ body,
     align-items: center;
     padding: 16px clamp(6px, 0.8vw, 12px);
     text-align: center;
-  }
-
-  .page-shell .story-section .story-milestone.is-top > .milestone-copy {
-    top: 0;
-    bottom: calc(50% + 34px);
-    justify-content: flex-end;
-  }
-
-  .page-shell .story-section .story-milestone.is-bottom > .milestone-copy {
-    top: calc(50% + 34px);
-    bottom: 0;
-    justify-content: flex-start;
   }
 
   .page-shell .story-section .story-milestone.is-top > .milestone-copy > .milestone-marker {
@@ -22810,5 +23010,525 @@ body,
     padding: 0;
     line-height: 1.6;
     text-align: center;
+  }
+}
+
+.page-shell .story-section .story-timeline {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  width: min(100%, 1500px);
+  min-height: 0;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(14px, 2.5vw, 24px);
+  margin: clamp(32px, 5vw, 64px) auto 0;
+  padding: 0 0 0 clamp(30px, 4vw, 42px);
+  list-style: none;
+}
+
+.page-shell .story-section .story-timeline::before {
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  right: auto;
+  bottom: 0;
+  left: 10px;
+  display: block;
+  width: 14px;
+  height: auto;
+  border: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 160' preserveAspectRatio='none'%3E%3Cpath d='M7 0 C1 20 13 40 7 60 C1 80 13 100 7 120 C1 140 13 150 7 160' fill='none' stroke='%23668B55' stroke-width='3' stroke-linecap='round' stroke-dasharray='3 7'/%3E%3C/svg%3E")
+    center top / 100% 160px repeat-y;
+  clip-path: inset(0 0 100% 0);
+  animation: none;
+}
+
+.page-shell .story-section.is-visible .story-timeline::before {
+  animation: safari-trail-draw-vertical 1.8s 180ms ease-out forwards;
+}
+
+.page-shell .story-section .story-timeline::after {
+  display: none;
+}
+
+.page-shell .story-section .story-milestone,
+.page-shell .story-section .story-milestone.is-top,
+.page-shell .story-section .story-milestone.is-bottom {
+  position: relative;
+  z-index: 1;
+  display: block;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  overflow: visible;
+  transform: translateY(12px);
+}
+
+.page-shell .story-section .story-milestone.is-visible {
+  transform: translateY(0);
+}
+
+.page-shell .story-section .story-milestone::before {
+  position: absolute;
+  z-index: 2;
+  top: 30px;
+  left: calc(-1 * clamp(30px, 4vw, 42px) + 10px);
+  display: block;
+  width: 14px;
+  height: 14px;
+  border: 3px solid var(--milestone-cream);
+  border-radius: 50%;
+  background: var(--milestone-gold);
+  box-shadow: 0 0 0 2px var(--milestone-green), 0 3px 8px rgb(52 77 54 / 18%);
+  content: "";
+  transform: translateX(-50%);
+}
+
+.page-shell .story-section .story-milestone::after {
+  display: none;
+}
+
+.page-shell .story-section .story-milestone .milestone-copy {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  grid-template-columns: clamp(54px, 15vw, 76px) minmax(0, 1fr);
+  grid-template-areas: "marker content";
+  align-items: start;
+  gap: clamp(12px, 2.4vw, 22px);
+  padding: clamp(14px, 2.5vw, 24px);
+  border: 1px solid rgb(52 77 54 / 12%);
+  border-radius: clamp(18px, 2vw, 24px);
+  color: var(--milestone-olive);
+  box-shadow: 0 12px 30px rgb(52 77 54 / 9%), 0 2px 6px rgb(52 77 54 / 5%);
+  text-align: left;
+  transition:
+    border-color 200ms ease,
+    box-shadow 240ms ease,
+    transform 240ms cubic-bezier(0.2, 0.65, 0.3, 1);
+}
+
+.page-shell .story-section .story-milestone:nth-child(6n + 1) .milestone-copy {
+  background: var(--milestone-sage);
+}
+
+.page-shell .story-section .story-milestone:nth-child(6n + 2) .milestone-copy {
+  background: #fff0cf;
+}
+
+.page-shell .story-section .story-milestone:nth-child(6n + 3) .milestone-copy {
+  background: #fce4d6;
+}
+
+.page-shell .story-section .story-milestone:nth-child(6n + 4) .milestone-copy {
+  background: #edf0d9;
+}
+
+.page-shell .story-section .story-milestone:nth-child(6n + 5) .milestone-copy {
+  background: #f8e6d9;
+}
+
+.page-shell .story-section .story-milestone:nth-child(6n) .milestone-copy {
+  background: #e7efdd;
+}
+
+.page-shell .story-section .milestone-copy::before,
+.page-shell .story-section .milestone-copy::after {
+  display: none;
+}
+
+.page-shell .story-section .story-milestone .milestone-marker {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: clamp(54px, 15vw, 76px);
+  aspect-ratio: 1;
+  flex: 0 0 auto;
+  grid-area: marker;
+  place-items: center;
+  align-self: start;
+  margin: 0;
+  border: 1px solid rgb(102 139 85 / 28%);
+  border-radius: 50%;
+  background: var(--milestone-cream);
+  box-shadow: 0 5px 16px rgb(22 57 39 / 10%);
+  animation: milestone-animal-float 4.2s ease-in-out infinite;
+}
+
+.page-shell .story-section .story-milestone:nth-child(even) .milestone-marker {
+  animation-delay: -1.6s;
+}
+
+.page-shell .story-section .story-milestone .milestone-marker::after {
+  display: none;
+}
+
+.page-shell .story-section .story-milestone .milestone-marker .journey-companion {
+  display: block;
+  width: 66%;
+  height: 66%;
+  overflow: visible;
+  color: var(--milestone-olive);
+  stroke-width: 1.5;
+}
+
+.page-shell .story-section .journey-companion-elephant {
+  color: #769d83;
+  fill: #b7d0bc;
+}
+
+.page-shell .story-section .journey-companion-lion {
+  color: #c47d50;
+  fill: #f3c65e;
+}
+
+.page-shell .story-section .journey-companion-giraffe {
+  color: #9c7640;
+  fill: #f2d785;
+}
+
+.page-shell .story-section .journey-companion-monkey {
+  color: #76533e;
+  fill: #c99365;
+}
+
+.page-shell .story-section .journey-companion-zebra {
+  color: #344d36;
+  fill: #fff9ed;
+}
+
+.page-shell .story-section .journey-companion-toucan {
+  color: #4a7954;
+  fill: #8dbb8e;
+}
+
+.page-shell .story-section .story-milestone .milestone-content {
+  display: flex;
+  min-width: 0;
+  grid-area: content;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+}
+
+.page-shell .story-section .story-milestone .milestone-number {
+  display: inline-grid;
+  min-width: 36px;
+  min-height: 30px;
+  place-items: center;
+  margin: 0;
+  padding: 4px 9px;
+  border: 1px solid rgb(157 117 45 / 22%);
+  border-radius: 999px;
+  background: #fbe4a1;
+  color: #735923;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.page-shell .story-section .story-milestone .milestone-date {
+  margin: 1px 0;
+  color: #80622d;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.page-shell .story-section .story-milestone .milestone-copy h4 {
+  max-width: 100%;
+  margin: 0;
+  color: var(--milestone-olive);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(18px, 2.5vw, 24px);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+.page-shell .story-section .story-milestone .milestone-description {
+  max-width: 100%;
+  margin: 0;
+  color: #52654e;
+  font-size: clamp(13px, 1.7vw, 15px);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.page-shell .story-section .story-milestone:hover .milestone-copy {
+  border-color: rgb(102 139 85 / 36%);
+  box-shadow: 0 18px 34px rgb(52 77 54 / 13%), 0 3px 8px rgb(52 77 54 / 7%);
+  transform: translateY(-3px);
+}
+
+.page-shell .story-section .story-milestone:hover .milestone-marker {
+  animation-play-state: paused;
+}
+
+.page-shell .story-section .journey-footnote {
+  max-width: 36ch;
+  margin: clamp(22px, 4vw, 34px) auto 0;
+  color: var(--milestone-green);
+  line-height: 1.65;
+  text-align: center;
+}
+
+@media (min-width: 1024px) {
+  .page-shell .story-section .story-timeline {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: clamp(8px, 1.15vw, 18px);
+    margin-top: clamp(32px, 3vw, 44px);
+    padding: 0;
+  }
+
+  .page-shell .story-section .story-timeline::before {
+    top: 50%;
+    right: 0;
+    bottom: auto;
+    left: 0;
+    width: auto;
+    height: clamp(44px, 5.2vw, 64px);
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 100' preserveAspectRatio='none'%3E%3Cpath d='M100 50 C145 50 145 12 200 12 S255 50 300 50 C345 50 345 88 400 88 S455 50 500 50 C545 50 545 12 600 12 S655 50 700 50 C745 50 745 88 800 88 S855 50 900 50 C945 50 945 12 1000 12 S1055 50 1100 50' fill='none' stroke='%23668B55' stroke-width='4' stroke-linecap='round' stroke-dasharray='3 9'/%3E%3C/svg%3E")
+      center / 100% 100% no-repeat;
+    clip-path: inset(0 100% 0 0);
+  }
+
+  .page-shell .story-section.is-visible .story-timeline::before {
+    animation: safari-trail-draw 1.8s 180ms ease-out forwards;
+  }
+
+  .page-shell .story-section .story-milestone,
+  .page-shell .story-section .story-milestone.is-top,
+  .page-shell .story-section .story-milestone.is-bottom {
+    display: grid;
+    min-height: clamp(400px, 26vw, 460px);
+    grid-template-rows: minmax(0, 1fr) clamp(48px, 4vw, 56px) minmax(0, 1fr);
+  }
+
+  .page-shell .story-section .story-milestone::before {
+    top: 50%;
+    left: 50%;
+  }
+
+  .page-shell .story-section .story-milestone::after {
+    position: absolute;
+    z-index: 0;
+    left: 50%;
+    display: block;
+    width: 2px;
+    height: clamp(56px, 4vw, 72px);
+    background: repeating-linear-gradient(
+      to bottom,
+      var(--milestone-green) 0 4px,
+      transparent 4px 8px
+    );
+    content: "";
+    transform: translateX(-50%);
+  }
+
+  .page-shell .story-section .story-milestone.is-top::after {
+    top: calc(50% - clamp(28px, 2vw, 36px));
+  }
+
+  .page-shell .story-section .story-milestone.is-bottom::after {
+    top: 50%;
+    height: clamp(56px, 4vw, 72px);
+  }
+
+  .page-shell .story-section .story-milestone.is-top .milestone-copy {
+    display: grid;
+    grid-row: 1;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "content"
+      "marker";
+    align-content: space-between;
+    align-self: stretch;
+    margin-bottom: clamp(12px, 1vw, 16px);
+    padding: clamp(10px, 1.15vw, 16px);
+    text-align: center;
+  }
+
+  .page-shell .story-section .story-milestone.is-bottom .milestone-copy {
+    display: grid;
+    grid-row: 3;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "marker"
+      "content";
+    align-content: space-between;
+    align-self: stretch;
+    margin-top: clamp(12px, 1vw, 16px);
+    padding: clamp(10px, 1.15vw, 16px);
+    text-align: center;
+  }
+
+  .page-shell .story-section .story-milestone .milestone-marker {
+    width: clamp(50px, 4.2vw, 62px);
+    justify-self: center;
+  }
+
+  .page-shell .story-section .story-milestone .milestone-content {
+    gap: 6px;
+    align-items: center;
+    text-align: center;
+  }
+
+  .page-shell .story-section .story-milestone .milestone-content > :not(.milestone-number) {
+    width: 100%;
+  }
+
+  .page-shell .story-section .story-milestone .milestone-copy h4 {
+    font-size: clamp(15px, 1.35vw, 19px);
+  }
+
+  .page-shell .story-section .story-milestone .milestone-description {
+    font-size: clamp(11px, 0.85vw, 13px);
+  }
+}
+
+@media (max-width: 767px) {
+  .page-shell .story-section .story-timeline {
+    gap: clamp(12px, 3vw, 16px);
+    margin-top: clamp(28px, 7vw, 40px);
+    padding-left: 32px;
+  }
+
+  .page-shell .story-section .story-timeline::before {
+    left: 8px;
+    width: 12px;
+  }
+
+  .page-shell .story-section .story-milestone::before {
+    top: 50%;
+    left: -24px;
+    width: 12px;
+    height: 12px;
+    border-width: 2px;
+    transform: translate(-50%, -50%);
+  }
+
+  .page-shell .story-section .story-milestone .milestone-copy {
+    min-height: clamp(132px, 36vw, 152px);
+    grid-template-columns: clamp(46px, 13vw, 58px) minmax(0, 1fr);
+    gap: clamp(10px, 3vw, 14px);
+    padding: clamp(13px, 4vw, 18px);
+    border-radius: 18px;
+    align-items: center;
+  }
+
+  .page-shell .story-section .story-milestone .milestone-marker {
+    width: clamp(46px, 13vw, 58px);
+    align-self: center;
+  }
+
+  .page-shell .story-section .story-milestone .milestone-content {
+    gap: 6px;
+    justify-content: center;
+    align-items: stretch;
+    text-align: left;
+  }
+
+  .page-shell .story-section .story-milestone .milestone-number {
+    align-self: flex-start;
+    min-width: 33px;
+    min-height: 27px;
+    font-size: 12px;
+  }
+
+  .page-shell .story-section .story-milestone .milestone-copy h4 {
+    font-size: clamp(16px, 4.8vw, 21px);
+    line-height: 1.22;
+  }
+
+  .page-shell .story-section .story-milestone .milestone-description {
+    font-size: 13px;
+    line-height: 1.55;
+  }
+}
+
+@keyframes safari-trail-draw-vertical {
+  to { clip-path: inset(0 0 0 0); }
+}
+
+.page-shell .story-section .story-milestone.is-visible::before {
+  animation: milestone-marker-arrive 520ms cubic-bezier(0.2, 0.65, 0.3, 1) both;
+}
+
+@keyframes milestone-marker-arrive {
+  0% {
+    box-shadow: 0 0 0 0 rgb(102 139 85 / 38%), 0 3px 8px rgb(52 77 54 / 18%);
+  }
+
+  100% {
+    box-shadow: 0 0 0 7px rgb(102 139 85 / 0%), 0 3px 8px rgb(52 77 54 / 18%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-shell .story-section .story-timeline::before,
+  .page-shell .story-section .story-milestone,
+  .page-shell .story-section .story-milestone::before,
+  .page-shell .story-section .milestone-marker,
+  .page-shell .story-section .journey-companion .companion-eyes,
+  .page-shell .story-section .journey-companion .companion-trunk,
+  .page-shell .story-section .journey-companion-giraffe .companion-giraffe-head,
+  .page-shell .story-section .journey-companion-monkey {
+    animation: none !important;
+    transition: none;
+  }
+
+  .page-shell .story-section .story-milestone {
+    opacity: 1;
+    transform: none;
+  }
+
+  .page-shell .story-section .story-timeline::before {
+    clip-path: none;
+  }
+}
+
+.admin-milestone-list {
+  display: grid;
+  gap: 14px;
+}
+
+.admin-milestone-card {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 16px;
+  padding: clamp(14px, 2vw, 20px);
+  border: 1px solid rgb(36 90 62 / 14%);
+  border-radius: 14px;
+  background: #fffdf6;
+}
+
+.admin-milestone-card > .milestone-number {
+  margin-top: 24px;
+}
+
+.admin-milestone-fields {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 680px) {
+  .admin-milestone-card {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .admin-milestone-card > .milestone-number {
+    margin-top: 0;
+  }
+
+  .admin-milestone-fields {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

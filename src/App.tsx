@@ -102,7 +102,7 @@ type Milestone = {
   title: string;
   date: string;
   description: string;
-  companion: SafariAnimal;
+  companion: JungleAnimal;
 };
 
 type GiftSuggestion = {
@@ -334,13 +334,13 @@ const defaultEventInfo: EventInformation = {
       title: "A Family Adventure",
       date: "[Add date]",
       description: "[Add the date and a family adventure to remember.]",
-      companion: "elephant",
+      companion: "monkey",
     },
     {
       title: "Growing Into Our Little Explorer",
       date: "[Add date]",
       description: "[Add a favorite memory from {babyName}'s life so far.]",
-      companion: "lion",
+      companion: "zebra",
     },
     {
       title: "Another Wonderful Birthday!",
@@ -1635,6 +1635,42 @@ const adventureStops: { id: string; label: string; companion: JungleAnimal }[] =
   { id: "destination", label: "Celebration Location", companion: "giraffe" },
 ];
 
+const railwayTrainPositions = {
+  desktop: [
+    [0, 20], [20, 20], [40, 20], [60, 20], [80, 20], [91, 47],
+    [80, 74], [60, 74], [40, 74], [20, 74], [0, 74],
+  ],
+  tablet: [
+    [0, 10], [33, 10], [67, 10], [84, 23], [67, 36], [33, 36],
+    [16, 49], [33, 61], [67, 61], [84, 74], [100, 87],
+  ],
+} as const;
+
+function SafariRailwayTrain() {
+  return (
+    <svg viewBox="0 0 76 48" aria-hidden="true">
+      <path d="M7 34h61v7H7z" fill="#795638" />
+      <path d="M12 19h35v16H12z" fill="#64875c" />
+      <path d="M47 24h12l8 11H47z" fill="#d88e61" />
+      <path d="M18 11h20l8 9H18z" fill="#486d4b" />
+      <path d="M23 14h10v8H23z" fill="#f8efdc" />
+      <path d="M51 17h7v8h-7z" fill="#f2c95e" />
+      <path d="M15 16h6v-8h8v8" fill="#d88e61" />
+      <path d="M17 8h9" stroke="#486d4b" strokeWidth="3" strokeLinecap="round" />
+      <g className="railway-wheel">
+        <circle cx="23" cy="39" r="6" fill="#354d39" />
+        <path d="M23 34v10" stroke="#f2c95e" strokeWidth="2" />
+      </g>
+      <g className="railway-wheel">
+        <circle cx="54" cy="39" r="6" fill="#354d39" />
+        <path d="M54 34v10" stroke="#f2c95e" strokeWidth="2" />
+      </g>
+      <path d="M9 29h5" stroke="#f2c95e" strokeWidth="3" strokeLinecap="round" />
+      <circle cx="12" cy="11" r="3" fill="#f2c95e" opacity=".8" />
+    </svg>
+  );
+}
+
 function getVisibleAdventureStops() {
   const visibility: Partial<Record<string, boolean>> = {
     countdown: eventInfo.invitation.sectionVisibility.countdown,
@@ -1679,6 +1715,7 @@ function SafariAdventure({
   soundMessage: string;
   onToggleSound: () => void;
 }) {
+  const trailRef = useRef<HTMLElement>(null);
   const visibleStops = getVisibleAdventureStops();
   const mapDestinations = [
     { id: "destination", title: "The Celebration", note: "The party clearing", symbol: "✿" },
@@ -1702,7 +1739,38 @@ function SafariAdventure({
   const progress = Math.round(
     (visitedSections.length / visibleStops.length) * 100,
   );
+  const completedStopCount = Math.min(visitedSections.length, visibleStops.length);
+  const desktopTrainPosition = railwayTrainPositions.desktop[completedStopCount] ??
+    railwayTrainPositions.desktop[0];
+  const tabletTrainPosition = railwayTrainPositions.tablet[completedStopCount] ??
+    railwayTrainPositions.tablet[0];
+  const mobileTrainPosition = [50, 5 + completedStopCount * 9] as const;
   const isComplete = visitedSections.length >= visibleStops.length;
+
+  useEffect(() => {
+    const trail = trailRef.current;
+    if (!trail) {
+      return;
+    }
+
+    if (!("IntersectionObserver" in window)) {
+      trail.classList.add("is-visible");
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          trail.classList.add("is-visible");
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.12 },
+    );
+    observer.observe(trail);
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <section
@@ -1749,7 +1817,62 @@ function SafariAdventure({
         </div>
       </div>
 
-      <nav className="trail-signposts" aria-label="Safari trail sections">
+      <nav
+        className="trail-signposts"
+        aria-label="Safari trail sections"
+        ref={trailRef}
+      >
+        <svg className="railway-track railway-track-desktop" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <pattern id="railway-sleepers-desktop" width="48" height="1000" patternUnits="userSpaceOnUse">
+              <path d="M24 180v40 M24 730v40" stroke="#b58a61" strokeWidth="14" strokeLinecap="round" />
+            </pattern>
+          </defs>
+          <rect className="railway-sleepers" width="1000" height="1000" fill="url(#railway-sleepers-desktop)" />
+          <path className="railway-rail" d="M0 190H890Q910 190 910 210V730Q910 750 890 750H0" />
+          <path className="railway-rail" d="M0 210H880Q890 210 890 220V720Q890 730 880 730H0" />
+        </svg>
+        <svg className="railway-track railway-track-tablet" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <pattern id="railway-sleepers-tablet" width="64" height="1000" patternUnits="userSpaceOnUse">
+              <path d="M32 80v40 M32 340v40 M32 590v40 M32 830v40" stroke="#b58a61" strokeWidth="14" strokeLinecap="round" />
+            </pattern>
+          </defs>
+          <rect className="railway-sleepers" width="1000" height="1000" fill="url(#railway-sleepers-tablet)" />
+          <path className="railway-rail" d="M0 90H824Q834 90 834 100V340Q834 350 824 350H176Q166 350 166 360V590Q166 600 176 600H824Q834 600 834 610V850H1000" />
+          <path className="railway-rail" d="M0 110H844Q844 110 844 120V340Q844 360 824 360H176Q156 360 156 380V590Q156 610 176 610H824Q844 610 844 630V850H1000" />
+        </svg>
+        <svg className="railway-track railway-track-mobile" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <pattern id="railway-sleepers-mobile" width="1000" height="64" patternUnits="userSpaceOnUse">
+              <path d="M465 32h70" stroke="#b58a61" strokeWidth="14" strokeLinecap="round" />
+            </pattern>
+          </defs>
+          <rect className="railway-sleepers" width="1000" height="1000" fill="url(#railway-sleepers-mobile)" />
+          <path className="railway-rail" d="M488 20V980" />
+          <path className="railway-rail" d="M512 20V980" />
+        </svg>
+        <span
+          className="railway-train railway-train-desktop"
+          style={{ left: `${desktopTrainPosition[0]}%`, top: `${desktopTrainPosition[1]}%` }}
+          aria-hidden="true"
+        >
+          <SafariRailwayTrain />
+        </span>
+        <span
+          className="railway-train railway-train-tablet"
+          style={{ left: `${tabletTrainPosition[0]}%`, top: `${tabletTrainPosition[1]}%` }}
+          aria-hidden="true"
+        >
+          <SafariRailwayTrain />
+        </span>
+        <span
+          className="railway-train railway-train-mobile"
+          style={{ left: `${mobileTrainPosition[0]}%`, top: `${mobileTrainPosition[1]}%` }}
+          aria-hidden="true"
+        >
+          <SafariRailwayTrain />
+        </span>
         {visibleStops.map((stop, index) => {
           const visited = visitedSections.includes(stop.id);
           return (
@@ -1784,7 +1907,7 @@ function SafariAdventure({
           <svg
             className="safari-map-art"
             viewBox="0 0 1000 390"
-            preserveAspectRatio="xMidYMid slice"
+            preserveAspectRatio="xMidYMid meet"
             aria-hidden="true"
           >
             <path className="map-river" d="M-20 305c118-45 185-60 278-26s133 36 215-16 132-42 204-9 129 33 204-3 100-37 145-23v175H-20Z" />
@@ -3192,6 +3315,45 @@ function SafariCompanion({ animal }: { animal: JungleAnimal }) {
   );
 }
 
+function MilestoneCard({
+  milestone,
+  index,
+}: {
+  milestone: Milestone;
+  index: number;
+}) {
+  const number = String(index + 1).padStart(2, "0");
+
+  return (
+    <li
+      className={`story-milestone${index % 2 === 0 ? " is-top" : " is-bottom"}`}
+      data-milestone-number={number}
+    >
+      <article className="milestone-copy" aria-labelledby={`milestone-title-${number}`}>
+        <span className="milestone-marker" aria-hidden="true">
+          <SafariCompanion animal={milestone.companion} />
+        </span>
+        <div className="milestone-content">
+          <span className="milestone-number">{number}</span>
+          {isProvided(milestone.date) && (
+            <p className="milestone-date">{formatEventCopy(milestone.date)}</p>
+          )}
+          <h4 id={`milestone-title-${number}`}>
+            {isProvided(milestone.title)
+              ? formatEventCopy(milestone.title)
+              : "A little memory"}
+          </h4>
+          {isProvided(milestone.description) && (
+            <p className="milestone-description">
+              {formatEventCopy(milestone.description)}
+            </p>
+          )}
+        </div>
+      </article>
+    </li>
+  );
+}
+
 function BirthdayCountdown() {
   const targetTimestamp = useRef<number | null>(getBirthdayTimestamp());
   const [secondsRemaining, setSecondsRemaining] = useState<number | null>(() =>
@@ -3519,30 +3681,11 @@ function BabysStory() {
 
       <ol className="story-timeline" aria-label="The little explorer's milestones">
         {eventInfo.milestones.map((milestone, index) => (
-          <li
-            className={`story-milestone${index % 2 === 0 ? " is-top" : " is-bottom"}`}
-            key={milestone.title}
-          >
-            <div className="milestone-copy">
-              <span className="milestone-marker" aria-hidden="true">
-                <SafariCompanion
-                  animal={(["elephant", "lion", "giraffe", "monkey", "zebra", "elephant"] as const)[index % 6]}
-                />
-              </span>
-              <span className="milestone-number">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              {isProvided(milestone.date) && (
-                <p className="milestone-date">{milestone.date}</p>
-              )}
-              <h4>{isProvided(milestone.title) ? milestone.title : "A little memory"}</h4>
-              {isProvided(milestone.description) && (
-                <p className="milestone-description">
-                  {formatEventCopy(milestone.description)}
-                </p>
-              )}
-            </div>
-          </li>
+          <MilestoneCard
+            key={index}
+            milestone={milestone}
+            index={index}
+          />
         ))}
       </ol>
       <p className="journey-footnote">The smallest moments become our favorite stories.</p>
@@ -8279,6 +8422,15 @@ function AdminDashboard() {
     setDraft((current) => patchEventSection(current, section, patch));
   };
 
+  const updateMilestone = (index: number, patch: Partial<Milestone>) => {
+    setDraft((current) => ({
+      ...current,
+      milestones: current.milestones.map((milestone, milestoneIndex) =>
+        milestoneIndex === index ? { ...milestone, ...patch } : milestone,
+      ),
+    }));
+  };
+
   const updateGallery = (id: string, patch: Partial<GalleryMemory>) => {
     setDraft((current) => ({
       ...current,
@@ -8700,56 +8852,117 @@ function AdminDashboard() {
           );
         };
   const renderProfile = () => (
-    <section className="admin-panel">
-      <div className="admin-panel-heading">
-        <span className="admin-panel-icon"><Baby size={18} /></span>
-        <div><p className="admin-eyebrow">THE STAR OF THE SHOW</p><h3>Baby profile</h3></div>
-      </div>
-      <div className="admin-form-grid">
-        <AdminInput label="Baby's name" value={draft.baby.name} required onChange={(name) => updateSection("baby", { name })} />
-        <AdminInput label="Birthday age" value={draft.baby.age} placeholder="Birthday Celebration" onChange={(age) => updateSection("baby", { age })} />
-        <AdminInput label="Date of birth" type="date" value={parseEventDate(draft.baby.birthDate) ? draft.baby.birthDate : ""} onChange={(birthDate) => updateSection("baby", { birthDate })} />
-        <AdminInput label="Parents' names" value={draft.baby.parentsNames} onChange={(parentsNames) => updateSection("baby", { parentsNames })} />
-        <AdminTextArea label="Profile description" value={draft.baby.introduction} rows={4} onChange={(introduction) => updateSection("baby", { introduction })} />
-        <AdminInput label="Profile photograph URL or /public path" value={draft.baby.heroPhotoUrl} placeholder="https://… or /images/baby.webp" onChange={(heroPhotoUrl) => updateSection("baby", { heroPhotoUrl })} />
-        <label className="admin-upload-field">
-          <span><Camera size={16} /> {draft.baby.heroPhotoUrl ? "Replace profile photo" : "Choose a profile photo"}</span>
-          <input
-            type="file"
-            accept="image/*"
-            disabled={isUploadingImage}
-            onChange={(event) => {
-              const file = event.target.files?.[0];
-              void uploadImage(file, (heroPhotoUrl) =>
-                updateSection("baby", { heroPhotoUrl, heroPhotoAlt: `A photograph of ${draft.baby.name}` }),
-              );
-              event.target.value = "";
-            }}
-          />
-          <small>{isUploadingImage ? "Preparing image…" : "Images are resized and stored in this browser after saving."}</small>
-        </label>
-        {getSafeImageSource(draft.baby.heroPhotoUrl) && (
-          <div className="admin-image-preview-wrap">
-            <div className="admin-image-preview admin-profile-preview">
-              <img src={getSafeImageSource(draft.baby.heroPhotoUrl) ?? undefined} alt={draft.baby.heroPhotoAlt || "Baby profile preview"} />
-              <span>Profile photo preview · unsaved draft</span>
-            </div>
-            <button
-              type="button"
-              className="admin-button-danger admin-image-remove"
-              onClick={() => {
-                updateSection("baby", { heroPhotoUrl: "", heroPhotoAlt: "" });
-                setFeedback({ kind: "success", message: "Profile photo removed from the draft. Save to apply the change." });
+    <>
+      <section className="admin-panel">
+        <div className="admin-panel-heading">
+          <span className="admin-panel-icon"><Baby size={18} /></span>
+          <div><p className="admin-eyebrow">THE STAR OF THE SHOW</p><h3>Baby profile</h3></div>
+        </div>
+        <div className="admin-form-grid">
+          <AdminInput label="Baby's name" value={draft.baby.name} required onChange={(name) => updateSection("baby", { name })} />
+          <AdminInput label="Birthday age" value={draft.baby.age} placeholder="Birthday Celebration" onChange={(age) => updateSection("baby", { age })} />
+          <AdminInput label="Date of birth" type="date" value={parseEventDate(draft.baby.birthDate) ? draft.baby.birthDate : ""} onChange={(birthDate) => updateSection("baby", { birthDate })} />
+          <AdminInput label="Parents' names" value={draft.baby.parentsNames} onChange={(parentsNames) => updateSection("baby", { parentsNames })} />
+          <AdminTextArea label="Profile description" value={draft.baby.introduction} rows={4} onChange={(introduction) => updateSection("baby", { introduction })} />
+          <AdminInput label="Profile photograph URL or /public path" value={draft.baby.heroPhotoUrl} placeholder="https://… or /images/baby.webp" onChange={(heroPhotoUrl) => updateSection("baby", { heroPhotoUrl })} />
+          <label className="admin-upload-field">
+            <span><Camera size={16} /> {draft.baby.heroPhotoUrl ? "Replace profile photo" : "Choose a profile photo"}</span>
+            <input
+              type="file"
+              accept="image/*"
+              disabled={isUploadingImage}
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                void uploadImage(file, (heroPhotoUrl) =>
+                  updateSection("baby", { heroPhotoUrl, heroPhotoAlt: `A photograph of ${draft.baby.name}` }),
+                );
+                event.target.value = "";
               }}
-            >
-              <Trash2 size={15} /> Remove photo
-            </button>
+            />
+            <small>{isUploadingImage ? "Preparing image…" : "Images are resized and stored in this browser after saving."}</small>
+          </label>
+          {getSafeImageSource(draft.baby.heroPhotoUrl) && (
+            <div className="admin-image-preview-wrap">
+              <div className="admin-image-preview admin-profile-preview">
+                <img src={getSafeImageSource(draft.baby.heroPhotoUrl) ?? undefined} alt={draft.baby.heroPhotoAlt || "Baby profile preview"} />
+                <span>Profile photo preview · unsaved draft</span>
+              </div>
+              <button
+                type="button"
+                className="admin-button-danger admin-image-remove"
+                onClick={() => {
+                  updateSection("baby", { heroPhotoUrl: "", heroPhotoAlt: "" });
+                  setFeedback({ kind: "success", message: "Profile photo removed from the draft. Save to apply the change." });
+                }}
+              >
+                <Trash2 size={15} /> Remove photo
+              </button>
+            </div>
+          )}
+          <AdminInput label="Photo description (alt text)" value={draft.baby.heroPhotoAlt} onChange={(heroPhotoAlt) => updateSection("baby", { heroPhotoAlt })} />
+          <AdminTextArea label="Parents' message" value={draft.baby.parentsMessage} rows={6} onChange={(parentsMessage) => updateSection("baby", { parentsMessage })} />
+        </div>
+      </section>
+      <section className="admin-panel admin-milestone-panel">
+        <div className="admin-panel-heading">
+          <span className="admin-panel-icon"><Leaf size={18} /></span>
+          <div>
+            <p className="admin-eyebrow">LITTLE BY LITTLE, DAY BY DAY</p>
+            <h3>Baby story milestones</h3>
           </div>
-        )}
-        <AdminInput label="Photo description (alt text)" value={draft.baby.heroPhotoAlt} onChange={(heroPhotoAlt) => updateSection("baby", { heroPhotoAlt })} />
-        <AdminTextArea label="Parents' message" value={draft.baby.parentsMessage} rows={6} onChange={(parentsMessage) => updateSection("baby", { parentsMessage })} />
-      </div>
-    </section>
+        </div>
+        <p className="admin-field-note">
+          Edit the six story stops, their optional dates, descriptions, and jungle friends. Save changes to update the public timeline.
+        </p>
+        <div className="admin-milestone-list">
+          {draft.milestones.map((milestone, index) => {
+            const number = String(index + 1).padStart(2, "0");
+            return (
+              <article className="admin-milestone-card" key={`milestone-${index}`}>
+                <span className="milestone-number" aria-label={`Milestone ${number}`}>{number}</span>
+                <div className="admin-form-grid admin-milestone-fields">
+                  <AdminInput
+                    label="Milestone title"
+                    value={milestone.title}
+                    onChange={(title) => updateMilestone(index, { title })}
+                  />
+                  <AdminInput
+                    label="Date or age (optional)"
+                    value={milestone.date}
+                    placeholder="Leave blank to hide"
+                    onChange={(date) => updateMilestone(index, { date })}
+                  />
+                  <AdminTextArea
+                    label="Milestone description"
+                    value={milestone.description}
+                    rows={3}
+                    onChange={(description) => updateMilestone(index, { description })}
+                  />
+                  <label className="admin-field">
+                    <span>Jungle friend</span>
+                    <select
+                      value={milestone.companion}
+                      onChange={(event) =>
+                        updateMilestone(index, {
+                          companion: event.target.value as JungleAnimal,
+                        })
+                      }
+                    >
+                      <option value="elephant">Elephant</option>
+                      <option value="lion">Lion</option>
+                      <option value="giraffe">Giraffe</option>
+                      <option value="monkey">Monkey</option>
+                      <option value="zebra">Zebra</option>
+                      <option value="toucan">Toucan</option>
+                    </select>
+                  </label>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+    </>
   );
 
   const renderEvent = () => (
