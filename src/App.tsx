@@ -27,10 +27,12 @@ import {
   ExternalLink,
   Eye,
   Gift,
+  Heart,
   Images,
   ImagePlus,
   LayoutDashboard,
   Leaf,
+  Maximize,
   MapPin,
   Menu,
   Mic,
@@ -41,7 +43,9 @@ import {
   Radio,
   RotateCcw,
   Save,
+  Share2,
   Send,
+  Sparkles,
   Settings,
   Trash2,
   UsersRound,
@@ -3950,248 +3954,326 @@ function GiftCorner() {
 
 function CelebrationStream() {
   const [secondsRemaining, setSecondsRemaining] = useState<number | null>(null);
-  const [showEmbeddedVideo, setShowEmbeddedVideo] = useState(false);
+  const [approvedWishes, setApprovedWishes] = useState<WishRecord[]>([]);
+  const [wishLoadError, setWishLoadError] = useState("");
+  const [chatDraft, setChatDraft] = useState("");
+  const [demoMessages, setDemoMessages] = useState<
+    Array<{ id: number; message: string; time: string }>
+  >([]);
+  const [reactionBubbles, setReactionBubbles] = useState<
+    Array<{ id: number; emoji: string }>
+  >([]);
+  const [shareMessage, setShareMessage] = useState("");
+  const [mediaError, setMediaError] = useState(false);
   const { streaming, celebration } = eventInfo;
-  const streamingUrl = getSafeStreamingUrl();
-  const embeddedVideoUrl = getSafeEmbeddedVideoUrl();
-  const recordingUrl = getSafeRecordingUrl();
-  const scheduleDate = isProvided(streaming.scheduledDateISO)
+  const safePlatformUrl = getSafeStreamingUrl();
+  const safeEmbedUrl = getSafeEmbeddedVideoUrl();
+  const safeRecordingUrl = getSafeRecordingUrl();
+  const shareUrl = buildWhatsAppShareUrl("stream");
+  const scheduledDate = isProvided(streaming.scheduledDateISO)
     ? streaming.scheduledDateISO
     : celebration.dateISO;
-  const scheduleTime = isProvided(streaming.scheduledTime24)
+  const scheduledTime = isProvided(streaming.scheduledTime24)
     ? streaming.scheduledTime24
     : celebration.startTime24;
-  const scheduleTimeZone = isProvided(streaming.timeZone)
+  const timeZone = isProvided(streaming.timeZone)
     ? streaming.timeZone.trim()
     : celebration.timeZone.trim();
-  const scheduleTimestamp = getEventTimestamp(
-    scheduleDate,
-    scheduleTime,
-    scheduleTimeZone,
-  );
-  const state: StreamingStatus =
+  const eventTimestamp = getEventTimestamp(scheduledDate, scheduledTime, timeZone);
+  const dateLabel = formatConfiguredDate(scheduledDate);
+  const timeLabel = formatEventTime(scheduledTime, "");
+  const timeZoneLabel = getTimeZoneLabel(timeZone, eventTimestamp ?? Date.now());
+
+  const getDirectVideoUrl = (value: string) => {
+    const url = getSafeHttpsUrl(value);
+    if (!url || hasPrivateUrlParameters(url)) return null;
+    return /\.(?:mp4|webm|ogv|ogg|m3u8)$/i.test(url.pathname) ? url.href : null;
+  };
+  const directStreamUrl = getDirectVideoUrl(streaming.streamingUrl);
+  const directRecordingUrl = getDirectVideoUrl(streaming.recordingUrl);
+  const configuredStream = Boolean(safePlatformUrl || safeEmbedUrl || directStreamUrl);
+  const status: StreamingStatus =
     streaming.status === "completed"
       ? "completed"
-      : streaming.status === "not-configured" || !streamingUrl
+      : streaming.status === "not-configured" || !configuredStream
         ? "not-configured"
         : streaming.status;
-  const isUpcoming = state === "upcoming";
-  const dateLabel = formatConfiguredDate(scheduleDate);
-  const timeLabel = formatEventTime(scheduleTime, "");
-  const timeZoneLabel = getTimeZoneLabel(
-    scheduleTimeZone,
-    scheduleTimestamp ?? Date.now(),
-  );
-  const whatsAppShareUrl = buildWhatsAppShareUrl("stream");
-  const streamUnits =
-    secondsRemaining === null
-      ? null
-      : [
-          { label: "Days", value: Math.floor(secondsRemaining / 86400) },
-          {
-            label: "Hours",
-            value: Math.floor((secondsRemaining % 86400) / 3600),
-          },
-          {
-            label: "Minutes",
-            value: Math.floor((secondsRemaining % 3600) / 60),
-          },
-          { label: "Seconds", value: secondsRemaining % 60 },
-        ];
+  const isUpcoming = status === "upcoming";
+  const isLive = status === "live" && configuredStream;
+  const youtubeEmbedUrl = useMemo(() => {
+    const sourceUrl = status === "completed" ? safeRecordingUrl : safePlatformUrl;
+    if (!sourceUrl || streaming.platform !== "YouTube Live") return null;
+    try {
+      const url = new URL(sourceUrl);
+      const videoId =
+        url.hostname === "youtu.be"
+          ? url.pathname.slice(1).split("/")[0]
+          : url.pathname.startsWith("/watch")
+            ? url.searchParams.get("v")
+            : url.pathname.match(/^\/(?:live|shorts)\/([A-Za-z0-9_-]+)/)?.[1];
+      return videoId && /^[A-Za-z0-9_-]+$/.test(videoId)
+        ? `https://www.youtube-nocookie.com/embed/${videoId}?controls=1&rel=0`
+        : null;
+    } catch {
+      return null;
+    }
+  }, [safePlatformUrl, safeRecordingUrl, status, streaming.platform]);
+  const embedUrl =
+    safeEmbedUrl ?? (isLive || status === "completed" ? youtubeEmbedUrl : null);
+  const videoUrl = isLive ? directStreamUrl : status === "completed" ? directRecordingUrl : null;
+  const streamUnits = secondsRemaining === null
+    ? []
+    : [
+        { label: "Days", value: Math.floor(secondsRemaining / 86400) },
+        { label: "Hours", value: Math.floor((secondsRemaining % 86400) / 3600) },
+        { label: "Minutes", value: Math.floor((secondsRemaining % 3600) / 60) },
+        { label: "Seconds", value: secondsRemaining % 60 },
+      ];
 
   useEffect(() => {
-    if (!isUpcoming || scheduleTimestamp === null) {
+    if (!isUpcoming || eventTimestamp === null) {
       setSecondsRemaining(null);
       return;
     }
-
-    const updateCountdown = () =>
-      setSecondsRemaining(getSecondsUntilBirthday(scheduleTimestamp));
+    const updateCountdown = () => setSecondsRemaining(getSecondsUntilBirthday(eventTimestamp));
     updateCountdown();
-    if (scheduleTimestamp <= Date.now()) {
-      return;
-    }
+    if (eventTimestamp <= Date.now()) return;
     const timerId = window.setInterval(updateCountdown, 1000);
     return () => window.clearInterval(timerId);
-  }, [isUpcoming, scheduleTimestamp]);
+  }, [eventTimestamp, isUpcoming]);
+
+  useEffect(() => {
+    let active = true;
+    void localDemoWishService.list()
+      .then((records) => {
+        if (active) {
+          setApprovedWishes(
+            records.filter((wish) =>
+              wish.status === "approved" && wish.type === "written" && wish.featured !== false,
+            ).slice(0, 3),
+          );
+        }
+      })
+      .catch((error: unknown) => {
+        if (active) {
+          setWishLoadError(
+            error instanceof Error
+              ? `Birthday wishes could not be loaded: ${error.message}`
+              : "Birthday wishes could not be loaded from this browser.",
+          );
+        }
+      });
+    return () => { active = false; };
+  }, []);
+
+  async function handleShareStream() {
+    const url = new URL(window.location.href);
+    url.hash = "celebrate-online";
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `${getBabyName()}'s birthday celebration`,
+          text: `Join ${getBabyName()}'s birthday celebration online.`,
+          url: url.href,
+        });
+        setShareMessage("Thanks for sharing the celebration!");
+      } else if (navigator.clipboard) {
+        await navigator.clipboard.writeText(url.href);
+        setShareMessage("Celebration link copied.");
+      } else {
+        setShareMessage("Sharing is unavailable here. Copy the page link from your address bar.");
+      }
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      setShareMessage(
+        error instanceof Error
+          ? `Could not share the celebration: ${error.message}`
+          : "Could not share the celebration.",
+      );
+    }
+  }
+
+  function addDemoReaction(emoji: string) {
+    const id = Date.now() + Math.random();
+    setReactionBubbles((current) => [...current.slice(-4), { id, emoji }]);
+    window.setTimeout(
+      () => setReactionBubbles((current) => current.filter((reaction) => reaction.id !== id)),
+      1600,
+    );
+  }
+
+  const statusLabel = isLive
+    ? "LIVE NOW"
+    : status === "upcoming"
+      ? "COMING UP"
+      : status === "completed"
+        ? "STREAM ENDED"
+        : "STREAM PREPARING";
+  const playerMessage = status === "upcoming"
+    ? "Our celebration begins soon"
+    : status === "completed"
+      ? "A lovely day to remember"
+      : "A little magic is on its way";
+  const playerDescription = status === "upcoming"
+    ? dateLabel && timeLabel
+      ? `${dateLabel} ? ${timeLabel}${timeZoneLabel ? ` ${timeZoneLabel}` : ""}`
+      : "The celebration schedule will be shared soon."
+    : status === "completed"
+      ? safeRecordingUrl
+        ? "The recording is ready to revisit."
+        : "Highlights are not available yet."
+      : "The organizer has not added a stream link yet.";
 
   return (
     <section
-      className="stream-section"
+      className="stream-section stream-redesign"
       id="celebrate-online"
       aria-labelledby="stream-title"
     >
-      <div className="stream-illustration" aria-hidden="true">
-        <span className="stream-sun" />
-        <span className="stream-hill stream-hill-back" />
-        <span className="stream-hill stream-hill-front" />
-        <span className="stream-leaf stream-leaf-left" />
-        <span className="stream-leaf stream-leaf-right" />
-        <span className="stream-animal"><SafariCompanion animal="elephant" /></span>
-      </div>
+      <div className="stream-redesign-inner">
+        <header className="stream-redesign-heading">
+          <p className="stream-redesign-kicker"><Leaf size={16} aria-hidden="true" /> A little celebration, wherever you are</p>
+          <h2 id="stream-title">{formatEventCopy(eventInfo.content.streamHeading)}</h2>
+          <p>{formatEventCopy(eventInfo.content.streamIntroduction)}</p>
+        </header>
 
-      <div className="stream-copy">
-        <p className="stream-kicker"><span aria-hidden="true" />A little celebration, wherever you are</p>
-        <h2 id="stream-title">
-          {formatEventCopy(eventInfo.content.streamHeading)}
-        </h2>
-        <p className="stream-introduction">
-          {formatEventCopy(eventInfo.content.streamIntroduction)}
-        </p>
-
-        {state === "upcoming" && (
-          <div className="stream-state stream-upcoming" aria-live="polite">
-            <p className="stream-status-label">Coming up on {streaming.platform}</p>
-            {dateLabel && timeLabel ? (
-              <p className="stream-schedule">
-                {dateLabel} · {timeLabel}
-                {timeZoneLabel ? ` ${timeZoneLabel}` : ""}
-              </p>
-            ) : (
-              <p className="stream-schedule">
-                The celebration schedule will be shared soon.
-              </p>
-            )}
-            {secondsRemaining !== null && secondsRemaining > 0 && streamUnits && (
-              <div className="stream-countdown" aria-label="Time until the live celebration">
-                {streamUnits.map((unit) => (
-                  <span key={unit.label}>
-                    <strong>{String(unit.value).padStart(2, "0")}</strong>
-                    <small>{unit.label}</small>
-                  </span>
-                ))}
-              </div>
-            )}
-            {secondsRemaining === 0 && (
-              <p className="stream-schedule">The scheduled start time has arrived.</p>
-            )}
-            {streamingUrl ? (
-              <a
-                className="stream-primary-action"
-                href={streamingUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Watch Live <span aria-hidden="true">↗</span>
-              </a>
-            ) : (
-              <button
-                className="stream-primary-action"
-                type="button"
-                disabled
-                aria-label="Watch Live link not configured"
-              >
-                Watch Live <span aria-hidden="true">↗</span>
-              </button>
-            )}
-            {embeddedVideoUrl && (
-              <button
-                className="stream-secondary-action"
-                type="button"
-                onClick={() => setShowEmbeddedVideo((shown) => !shown)}
-                aria-expanded={showEmbeddedVideo}
-              >
-                {showEmbeddedVideo ? "Hide video" : "Watch here"}
-              </button>
-            )}
-            {showEmbeddedVideo && embeddedVideoUrl && (
-              <div className="stream-video-frame">
+        <div className="stream-redesign-layout">
+          <div className="stream-redesign-main">
+            <div className={`stream-live-player${embedUrl || videoUrl ? " has-media" : ""}`}>
+              <span className={`stream-live-badge is-${isLive ? "live" : status}`}>
+                {isLive && <span aria-hidden="true" />}{statusLabel}
+              </span>
+              {(isLive || status === "completed") && embedUrl ? (
                 <iframe
-                  src={embeddedVideoUrl}
-                  title={`${getBabyName()}'s live birthday celebration`}
+                  src={embedUrl}
+                  title={`${getBabyName()}'s birthday celebration stream`}
                   loading="lazy"
-                  allow="encrypted-media; picture-in-picture"
+                  allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
                   referrerPolicy="strict-origin-when-cross-origin"
                   allowFullScreen
                 />
-              </div>
-            )}
-          </div>
-        )}
+              ) : videoUrl ? (
+                <video
+                  src={videoUrl}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  onError={() => setMediaError(true)}
+                  aria-label={`${getBabyName()}'s birthday ${status === "completed" ? "recording" : "live stream"}`}
+                />
+              ) : (
+                <div className={`stream-live-placeholder is-${status}`}>
+                  <span className="stream-live-sun" aria-hidden="true" />
+                  <span className="stream-live-leaf stream-live-leaf-left" aria-hidden="true" />
+                  <span className="stream-live-leaf stream-live-leaf-right" aria-hidden="true" />
+                  <span className="stream-live-animal" aria-hidden="true"><SafariCompanion animal="elephant" /></span>
+                  <Sparkles className="stream-live-sparkle stream-live-sparkle-one" aria-hidden="true" />
+                  <Sparkles className="stream-live-sparkle stream-live-sparkle-two" aria-hidden="true" />
+                  <div className="stream-live-placeholder-copy">
+                    <strong>{playerMessage}</strong>
+                    <span>{playerDescription}</span>
+                    {status === "live" && safePlatformUrl && (
+                      <a href={safePlatformUrl} target="_blank" rel="noopener noreferrer">
+                        Open {streaming.platform} <ExternalLink size={15} />
+                      </a>
+                    )}
+                    {status === "completed" && safeRecordingUrl && (
+                      <a href={safeRecordingUrl} target="_blank" rel="noopener noreferrer">
+                        Watch celebration recording <ExternalLink size={15} />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+              {mediaError && (
+                <p className="stream-live-error" role="alert">
+                  This video could not be played here. Open the stream or recording in a new tab.
+                </p>
+              )}
+              {isLive && !embedUrl && !videoUrl && safePlatformUrl && (
+                <a className="stream-live-external" href={safePlatformUrl} target="_blank" rel="noopener noreferrer">
+                  Open the {streaming.platform} stream <ExternalLink size={16} />
+                </a>
+              )}
+            </div>
 
-        {state === "live" && (
-          <div className="stream-state stream-live" aria-live="polite">
-            <p className="stream-live-label"><span aria-hidden="true" /> LIVE NOW · {streaming.platform}</p>
-            <a
-              className="stream-primary-action"
-              href={streamingUrl ?? undefined}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-disabled={!streamingUrl}
-            >
-              Watch Live <span aria-hidden="true">↗</span>
-            </a>
-            {embeddedVideoUrl && (
-              <>
-                <button
-                  className="stream-secondary-action"
-                  type="button"
-                  onClick={() => setShowEmbeddedVideo((shown) => !shown)}
-                  aria-expanded={showEmbeddedVideo}
-                >
-                  {showEmbeddedVideo ? "Hide video" : "Watch here"}
-                </button>
-                {showEmbeddedVideo && (
-                  <div className="stream-video-frame">
-                    <iframe
-                      src={embeddedVideoUrl}
-                      title={`${getBabyName()}'s live birthday celebration`}
-                      loading="lazy"
-                      allow="encrypted-media; picture-in-picture"
-                      referrerPolicy="strict-origin-when-cross-origin"
-                      allowFullScreen
-                    />
+            {isUpcoming && (
+              <div className="stream-live-upcoming" aria-live="polite">
+                <strong>{dateLabel && timeLabel ? `${dateLabel} ? ${timeLabel}${timeZoneLabel ? ` ${timeZoneLabel}` : ""}` : "Celebration schedule to be announced"}</strong>
+                {secondsRemaining !== null && secondsRemaining > 0 && (
+                  <div className="stream-live-countdown" aria-label="Time until the live celebration">
+                    {streamUnits.map((unit) => (
+                      <span key={unit.label}><strong>{String(unit.value).padStart(2, "0")}</strong><small>{unit.label}</small></span>
+                    ))}
                   </div>
                 )}
-              </>
+                {secondsRemaining === 0 && <span>The scheduled start time has arrived. The stream will appear when the organizer starts it.</span>}
+              </div>
             )}
-          </div>
-        )}
 
-        {state === "completed" && (
-          <div className="stream-state stream-completed" aria-live="polite">
-            <p className="stream-status-label">A little day to remember</p>
-            {recordingUrl ? (
-              <a
-                className="stream-primary-action"
-                href={recordingUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Watch Celebration Highlights <span aria-hidden="true">↗</span>
-              </a>
-            ) : (
-              <p className="stream-schedule">
-                Thank you for celebrating with us. Highlights are not available yet.
-              </p>
-            )}
-          </div>
-        )}
+            <div className="stream-live-event-details">
+              <span><CalendarDays size={18} aria-hidden="true" /><span><small>CELEBRATION DATE</small><strong>{dateLabel || "To be announced"}</strong></span></span>
+              <span><Clock3 size={18} aria-hidden="true" /><span><small>START TIME</small><strong>{timeLabel ? `${timeLabel}${timeZoneLabel ? ` ${timeZoneLabel}` : ""}` : "To be announced"}</strong></span></span>
+            </div>
 
-        {state === "not-configured" && (
-          <div className="stream-state stream-not-configured">
-            <p className="stream-status-label">The stream is being prepared</p>
-            <p className="stream-schedule">
-              Our live celebration details will be shared here soon.
-            </p>
-          </div>
-        )}
+            <div className="stream-live-greeting">
+              <span className="stream-live-greeting-animal" aria-hidden="true"><SafariCompanion animal="lion" /></span>
+              <span><small>A LITTLE BIRTHDAY CHEER</small><strong>Sending {getBabyName()} the biggest birthday wishes!</strong><span>Thanks for being part of this little adventure, wherever you?re watching from.</span></span>
+              <Sparkles aria-hidden="true" />
+            </div>
 
-        {whatsAppShareUrl ? (
-          <a
-            className="stream-share-action"
-            href={whatsAppShareUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <WhatsAppIcon /> Share the stream on WhatsApp
-          </a>
-        ) : (
-          <p className="stream-share-note">
-            WhatsApp sharing will be available when a valid sharing number is
-            configured.
-          </p>
-        )}
+            <div className="stream-live-info-cards">
+              <article><CalendarDays size={19} aria-hidden="true" /><small>CELEBRATION DETAILS</small><strong>{dateLabel || "Date to be announced"}</strong><span>{timeLabel ? `${timeLabel}${timeZoneLabel ? ` ${timeZoneLabel}` : ""}` : "Time to be announced"}</span></article>
+              <article><Heart size={19} aria-hidden="true" /><small>BIRTHDAY WISHES</small><strong>{approvedWishes.length ? `${approvedWishes.length} approved wishes` : "Send a little love"}</strong><span>Approved wishes from this browser?s demo wish wall.</span></article>
+              <article className="stream-live-share-card"><Share2 size={19} aria-hidden="true" /><small>SHARE THE CELEBRATION</small><strong>Pass the party along</strong><button type="button" onClick={() => void handleShareStream()}>Share this celebration <Share2 size={15} /></button>{shareUrl && <a href={shareUrl} target="_blank" rel="noopener noreferrer"><WhatsAppIcon /> Share on WhatsApp</a>}{shareMessage && <span role="status">{shareMessage}</span>}</article>
+            </div>
+          </div>
+
+          <aside className="stream-live-lounge" aria-label="Birthday celebration interactions">
+            <div className="stream-live-lounge-heading"><MessageCircle size={20} aria-hidden="true" /><span><small>GUEST LOUNGE</small><strong>Share the joy</strong></span><span className="stream-live-demo-tag">LOCAL DEMO</span></div>
+            <p className="stream-live-demo-notice">Chat and reactions are a local demo only. Messages are not sent to other guests.</p>
+            <p className="stream-live-viewers"><UsersRound size={16} aria-hidden="true" /> Viewer count is not provided by the configured stream.</p>
+
+            <section className="stream-live-wishes" aria-labelledby="stream-live-wishes-title">
+              <h3 id="stream-live-wishes-title"><Heart size={16} aria-hidden="true" /> Birthday wishes</h3>
+              {wishLoadError ? <p role="alert">{wishLoadError}</p> : approvedWishes.length ? (
+                <ul>{approvedWishes.map((wish) => <li key={wish.id}><p>{wish.message || wish.caption}</p><span>? {wish.guestName || "A friend"}</span></li>)}</ul>
+              ) : <p>No approved wishes have been shared in this browser?s demo wall yet.</p>}
+            </section>
+
+            <section className="stream-live-chat" aria-labelledby="stream-live-chat-title">
+              <h3 id="stream-live-chat-title"><MessageCircle size={16} aria-hidden="true" /> Celebration chat</h3>
+              <div className="stream-live-messages" aria-live="polite">
+                {demoMessages.length ? demoMessages.map((message) => (
+                  <article key={message.id}><span aria-hidden="true">G</span><div><strong>Guest ? demo</strong><p>{message.message}</p><small>{message.time}</small></div></article>
+                )) : <p>Your birthday message will appear here in this demo.</p>}
+                {reactionBubbles.length > 0 && <div className="stream-live-reaction-bubbles" aria-label="Recent demo reactions">{reactionBubbles.map((reaction) => <span key={reaction.id}>{reaction.emoji}</span>)}</div>}
+              </div>
+              <form onSubmit={(event) => {
+                event.preventDefault();
+                const message = chatDraft.trim();
+                if (!message) return;
+                setDemoMessages((current) => [...current.slice(-19), {
+                  id: Date.now(),
+                  message,
+                  time: new Intl.DateTimeFormat("en", { hour: "numeric", minute: "2-digit" }).format(new Date()),
+                }]);
+                setChatDraft("");
+              }}>
+                <label className="visually-hidden" htmlFor="stream-live-chat-input">Write a demo birthday message</label>
+                <input id="stream-live-chat-input" type="text" maxLength={280} value={chatDraft} onChange={(event) => setChatDraft(event.target.value)} placeholder="Write a little birthday wish?" />
+                <button type="submit" disabled={!chatDraft.trim()} aria-label="Add message to local demo chat"><Send size={17} aria-hidden="true" /></button>
+              </form>
+            </section>
+
+            <div className="stream-live-reactions" aria-label="Local demo reactions">
+              <span>Send a little cheer</span>
+              {[{ emoji: "??", label: "heart" }, { emoji: "??", label: "party" }, { emoji: "??", label: "lion" }, { emoji: "?", label: "sparkles" }].map(({ emoji, label }) => (
+                <button key={emoji} type="button" aria-label={`Send ${label} reaction in local demo`} onClick={() => addDemoReaction(emoji)}>{emoji}</button>
+              ))}
+            </div>
+          </aside>
+        </div>
       </div>
     </section>
   );
