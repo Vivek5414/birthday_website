@@ -13941,6 +13941,12 @@ select:focus-visible {
     font-size: 9px;
   }
 
+  .admin-heading-actions > a {
+    flex: 1;
+    padding-inline: 9px;
+    font-size: 9px;
+  }
+
   .admin-welcome-banner {
     min-height: 180px;
     padding: 20px 17px;
@@ -22486,5 +22492,323 @@ body,
   .navigation-toggle,
   .navigation-toggle span {
     transition: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .page-shell .story-section .story-timeline {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-rows: minmax(0, 1fr);
+    gap: clamp(8px, 1.25vw, 18px);
+    height: clamp(640px, 45vw, 740px);
+    min-height: 0;
+  }
+
+  .page-shell .story-section .story-timeline::before {
+    top: 50%;
+    right: 0;
+    bottom: auto;
+    left: 0;
+    display: block;
+    width: auto;
+    height: 0;
+    border: 0;
+    border-top: 2px dashed rgb(102 139 85 / 43%);
+    background: none;
+  }
+
+  .page-shell .story-section .story-milestone {
+    display: block;
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+    padding: 0;
+  }
+
+  .page-shell .story-section .story-milestone::before {
+    display: block;
+    top: 50%;
+    left: 50%;
+  }
+
+  .page-shell .story-section .story-milestone::after {
+    display: none;
+  }
+
+  .page-shell .story-section .story-milestone > .milestone-copy {
+    position: absolute;
+    right: 0;
+    left: 0;
+    display: flex;
+    min-width: 0;
+    height: auto;
+    min-height: 0;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px clamp(6px, 0.8vw, 12px);
+    text-align: center;
+  }
+
+  .page-shell .story-section .story-milestone.is-top > .milestone-copy {
+    top: 0;
+    bottom: calc(50% + 34px);
+    justify-content: flex-end;
+  }
+
+  .page-shell .story-section .story-milestone.is-bottom > .milestone-copy {
+    top: calc(50% + 34px);
+    bottom: 0;
+    justify-content: flex-start;
+  }
+
+  .page-shell .story-section .story-milestone.is-top > .milestone-copy > .milestone-marker {
+    width: clamp(48px, 4vw, 58px);
+    height: clamp(48px, 4vw, 58px);
+    flex-basis: clamp(48px, 4vw, 58px);
+    order: 5;
+    margin: 13px auto 0;
+  }
+
+  .page-shell .story-section .story-milestone.is-bottom > .milestone-copy > .milestone-marker {
+    width: clamp(48px, 4vw, 58px);
+    height: clamp(48px, 4vw, 58px);
+    flex-basis: clamp(48px, 4vw, 58px);
+    order: 0;
+    margin: 0 auto 13px;
+  }
+
+  .page-shell .story-section .milestone-marker .journey-companion {
+    width: 68%;
+    height: 68%;
+  }
+
+  .page-shell .story-section .milestone-copy h4 {
+    font-size: clamp(14px, 1.25vw, 19px);
+  }
+
+  .page-shell .story-section .milestone-description {
+    font-size: clamp(9px, 0.72vw, 11px);
+    line-height: 1.55;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .page-shell .story-section .story-timeline {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(14px, 2.5vw, 24px);
+    min-height: 0;
+  }
+
+  .page-shell .story-section .story-timeline::before,
+  .page-shell .story-section .story-timeline::after {
+    display: none;
+  }
+
+  .page-shell .story-section .story-milestone,
+  .page-shell .story-section .story-milestone.is-top,
+  .page-shell .story-section .story-milestone.is-bottom {
+    display: block;
+    min-width: 0;
+    min-height: 0;
+    padding: 0;
+    border-left: 0;
+  }
+
+  .page-shell .story-section .story-milestone::before,
+  .page-shell .story-section .story-milestone::after {
+    display: none;
+  }
+
+  .page-shell .story-section .story-milestone > .milestone-copy,
+  .page-shell .story-section .story-milestone.is-top > .milestone-copy,
+  .page-shell .story-section .story-milestone.is-bottom > .milestone-copy {
+    display: grid;
+    min-width: 0;
+    min-height: 260px;
+    grid-template-columns: clamp(52px, 7vw, 68px) minmax(0, 1fr);
+    grid-template-rows: auto auto auto 1fr;
+    column-gap: clamp(12px, 2vw, 20px);
+    align-content: start;
+    align-items: start;
+    justify-content: start;
+    padding: clamp(16px, 2.5vw, 24px);
+    text-align: left;
+  }
+
+  .page-shell .story-section .story-milestone > .milestone-copy > .milestone-marker {
+    grid-column: 1;
+    grid-row: 1 / span 4;
+    width: clamp(52px, 7vw, 68px);
+    height: clamp(52px, 7vw, 68px);
+    flex-basis: auto;
+    align-self: start;
+    justify-self: center;
+    margin: 0;
+    order: 0;
+  }
+
+  .page-shell .story-section .story-milestone > .milestone-copy > .milestone-number,
+  .page-shell .story-section .story-milestone > .milestone-copy > .milestone-date,
+  .page-shell .story-section .story-milestone > .milestone-copy > h4,
+  .page-shell .story-section .story-milestone > .milestone-copy > .milestone-description {
+    grid-column: 2;
+    max-width: 100%;
+    text-align: left;
+  }
+
+  .page-shell .story-section .story-milestone > .milestone-copy > .milestone-number {
+    grid-row: 1;
+    order: 0;
+  }
+
+  .page-shell .story-section .story-milestone > .milestone-copy > .milestone-date {
+    grid-row: 2;
+    order: 0;
+    margin: 6px 0;
+  }
+
+  .page-shell .story-section .story-milestone > .milestone-copy > h4 {
+    grid-row: 3;
+    order: 0;
+    font-size: clamp(18px, 2.3vw, 24px);
+  }
+
+  .page-shell .story-section .story-milestone > .milestone-copy > .milestone-description {
+    grid-row: 4;
+    order: 0;
+    margin-top: 8px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 767px) {
+  .page-shell .story-section .story-timeline {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    min-height: 0;
+    margin-top: clamp(28px, 7vw, 40px);
+    padding: 0 0 0 24px;
+  }
+
+  .page-shell .story-section .story-timeline::before {
+    top: 8px;
+    right: auto;
+    bottom: 8px;
+    left: 7px;
+    display: block;
+    width: 2px;
+    height: auto;
+    border: 0;
+    background: linear-gradient(var(--milestone-green), var(--milestone-green));
+  }
+
+  .page-shell .story-section .story-timeline::after {
+    display: none;
+  }
+
+  .page-shell .story-section .story-milestone,
+  .page-shell .story-section .story-milestone.is-top,
+  .page-shell .story-section .story-milestone.is-bottom {
+    display: block;
+    min-width: 0;
+    min-height: 0;
+    padding: 0;
+    border-left: 0;
+  }
+
+  .page-shell .story-section .story-milestone::before {
+    top: 22px;
+    left: -24px;
+    display: block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--milestone-cream);
+    background: var(--milestone-green);
+    box-shadow: 0 0 0 1px var(--milestone-green);
+    transform: translate(-50%, 0);
+  }
+
+  .page-shell .story-section .story-milestone::after {
+    display: none;
+  }
+
+  .page-shell .story-section .story-milestone > .milestone-copy,
+  .page-shell .story-section .story-milestone.is-top > .milestone-copy,
+  .page-shell .story-section .story-milestone.is-bottom > .milestone-copy {
+    display: grid;
+    min-width: 0;
+    min-height: 0;
+    grid-template-columns: clamp(44px, 14vw, 56px) minmax(0, 1fr);
+    grid-template-rows: auto auto auto auto;
+    column-gap: clamp(10px, 3.5vw, 15px);
+    row-gap: 3px;
+    align-content: start;
+    align-items: start;
+    justify-content: start;
+    padding: clamp(14px, 4vw, 20px);
+    text-align: left;
+  }
+
+  .page-shell .story-section .story-milestone > .milestone-copy > .milestone-marker {
+    grid-column: 1;
+    grid-row: 1 / span 4;
+    width: clamp(44px, 14vw, 56px);
+    height: clamp(44px, 14vw, 56px);
+    flex-basis: auto;
+    align-self: start;
+    justify-self: center;
+    margin: 0;
+    order: 0;
+  }
+
+  .page-shell .story-section .milestone-marker::after {
+    display: none;
+  }
+
+  .page-shell .story-section .story-milestone > .milestone-copy > .milestone-number,
+  .page-shell .story-section .story-milestone > .milestone-copy > .milestone-date,
+  .page-shell .story-section .story-milestone > .milestone-copy > h4,
+  .page-shell .story-section .story-milestone > .milestone-copy > .milestone-description {
+    grid-column: 2;
+    max-width: 100%;
+    text-align: left;
+  }
+
+  .page-shell .story-section .story-milestone > .milestone-copy > .milestone-number {
+    grid-row: 1;
+    order: 0;
+    font-size: 11px;
+  }
+
+  .page-shell .story-section .story-milestone > .milestone-copy > .milestone-date {
+    grid-row: 2;
+    order: 0;
+    margin: 4px 0;
+  }
+
+  .page-shell .story-section .story-milestone > .milestone-copy > h4 {
+    grid-row: 3;
+    order: 0;
+    font-size: clamp(18px, 5.2vw, 23px);
+    line-height: 1.2;
+  }
+
+  .page-shell .story-section .story-milestone > .milestone-copy > .milestone-description {
+    grid-row: 4;
+    order: 0;
+    margin-top: 4px;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  .page-shell .story-section .journey-footnote {
+    max-width: 34ch;
+    margin: 16px auto 0;
+    padding: 0;
+    line-height: 1.6;
+    text-align: center;
   }
 }

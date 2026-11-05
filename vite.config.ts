@@ -6,5 +6,10 @@ export default defineConfig({
     ? "/birthday_website/"
     : "/",
 
+  server: {
+    port: 5173,
+    strictPort: true,
+  },
+
   plugins: [react()],
 });

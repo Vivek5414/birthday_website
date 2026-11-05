@@ -9261,6 +9261,9 @@ function AdminDashboard() {
               <button type="button" className="admin-button-danger" onClick={() => void resetDemoData()}>
                 <Trash2 size={15} /> Reset demo data
               </button>
+              <a className="admin-button-secondary" href="/">
+                <ArrowLeft size={15} /> Back to Website
+              </a>
             </div>
           </div>
           {feedback && (

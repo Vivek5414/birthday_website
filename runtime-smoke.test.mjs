@@ -17,3 +17,20 @@ test("production build includes loadable JavaScript and CSS assets", async () =>
     ),
   );
 });
+
+test("Vercel rewrites client-side routes to the SPA entry point", async () => {
+  const config = JSON.parse(
+    await readFile(new URL("./vercel.json", import.meta.url), "utf8"),
+  );
+
+  assert.deepEqual(config.rewrites, [
+    { source: "/(.*)", destination: "/index.html" },
+  ]);
+});
+
+test("Vite uses the single strict development port", async () => {
+  const config = await readFile(new URL("./vite.config.ts", import.meta.url), "utf8");
+
+  assert.match(config, /port:\s*5173/);
+  assert.match(config, /strictPort:\s*true/);
+});

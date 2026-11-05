@@ -26,8 +26,8 @@
       "name": "dev-server-serves-home",
       "kind": "http-probe",
       "startCommand": "npm",
-      "startArgs": ["run", "dev", "--", "--host", "127.0.0.1", "--port", "5176", "--strictPort"],
-      "url": "http://127.0.0.1:5176/",
+      "startArgs": ["run", "dev"],
+      "url": "http://localhost:5173/",
       "verificationMethod": "http-status",
       "expected": "200",
       "timeoutSeconds": 120
@@ -36,8 +36,8 @@
       "name": "dev-server-serves-admin",
       "kind": "http-probe",
       "startCommand": "npm",
-      "startArgs": ["run", "dev", "--", "--host", "127.0.0.1", "--port", "5176", "--strictPort"],
-      "url": "http://127.0.0.1:5176/admin",
+      "startArgs": ["run", "dev"],
+      "url": "http://localhost:5173/admin",
       "verificationMethod": "http-status",
       "expected": "200",
       "timeoutSeconds": 120
